@@ -14,17 +14,26 @@ FKGLancher.init = function() {
 
 
 FKGLancher.initEvent = function() {
+    chrome.browserAction.onClicked.addListener(function(tab) {
+        if (!FKGLancher.window) {
+            FKGLancher.openGameWindow();
+        }
+    });
+
     chrome.webNavigation.onDOMContentLoaded.addListener(function(details) {
         if (FKGLancher.window && details.tabId == FKGLancher.window.tabs[0].id) {
             chrome.tabs.executeScript(FKGLancher.window.tabs[0].id, {
                 "file": "onDOMContentLoaded.js"
-            }, function() {});
+            });
         }
     });
 
     chrome.windows.onRemoved.addListener(function(windowId) {
         if (FKGLancher.window && FKGLancher.window.id == windowId) {
             FKGLancher.window = null;
+            chrome.browserAction.setPopup({
+                "popup": ""
+            });
         }
     });
 }
@@ -78,6 +87,9 @@ FKGLancher.openGameWindow = function() {
         return;
     }
 
+    chrome.browserAction.setPopup({
+        "popup": "popup.html"
+    });
     chrome.windows.create({
             "url": FKGLancher.gameUrl,
             "focused": true,
@@ -89,24 +101,20 @@ FKGLancher.openGameWindow = function() {
         },
         function(newWindow) {
             FKGLancher.window = newWindow;
-            FKGLancher.resizeMainWindow(FKGLancher.gameSize.width, FKGLancher.gameSize.height);
+
+            chrome.windows.get(newWindow.id, {
+                    "populate": true
+                },
+                function(win) {
+                    chrome.windows.update(win.id, {
+                        "width": Math.floor(FKGLancher.gameSize.width) + (win.width - win.tabs[0].width),
+                        "height": Math.floor(FKGLancher.gameSize.height) + (win.height - win.tabs[0].height),
+                        "focused": true
+                    });
+                }
+            );
         }
     );
-}
-
-FKGLancher.resizeMainWindow = function(_width, _height) {
-    if (!FKGLancher.window) {
-        return;
-    }
-    chrome.windows.get(FKGLancher.window.id, {
-        "populate": true
-    }, function(win) {
-        chrome.windows.update(win.id, {
-            "width": Math.floor(_width) + (win.width - win.tabs[0].width),
-            "height": Math.floor(_height) + (win.height - win.tabs[0].height),
-            "focused": true
-        });
-    });
 }
 
 FKGLancher.screenShot = function() {
@@ -114,8 +122,7 @@ FKGLancher.screenShot = function() {
         return;
     }
 
-    chrome.tabs.captureVisibleTab(
-        FKGLancher.window.id, {
+    chrome.tabs.captureVisibleTab(FKGLancher.window.id, {
             "format": "png"
         },
         function(dataUrl) {

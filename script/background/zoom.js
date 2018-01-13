@@ -1,0 +1,3 @@
+FKGLancher.zoom.toggleFullscreen = function() {
+
+}

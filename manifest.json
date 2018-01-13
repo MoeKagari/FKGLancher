@@ -6,8 +6,11 @@
     "author": "MoeKagari",
     "background": {
         "scripts": [
-            "background.js",
-            "screenShot.js"
+            "script/background/background.js",
+            "script/background/screenShot.js",
+            "script/background/zoom.js",
+            "script/background/sound.js",
+            "script/background/other.js"
         ],
         "persistent": false
     },

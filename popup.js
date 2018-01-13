@@ -36,6 +36,9 @@ document.getElementById("mute").onclick = function() {
     });
 };
 
+
+
+
 //标准size
 document.getElementById("zoom_normal").onclick = function() {
     chrome.runtime.sendMessage({
@@ -64,6 +67,9 @@ document.getElementById("zoom_out").onclick = function() {
         "messageType": "zoom_out"
     });
 };
+
+
+
 
 //设置页面
 document.getElementById("setting").onclick = function() {

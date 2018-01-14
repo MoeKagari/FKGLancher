@@ -1,18 +1,18 @@
 FKGLancher.screenShot.take = function() {
-    if (!FKGLancher.window) return;
-
-    setTimeout(function() {
-        chrome.tabs.captureVisibleTab(FKGLancher.window.id, {
-                "format": "png"
-            },
-            function(dataUrl) {
-                chrome.downloads.download({
-                    "url": dataUrl,
-                    "filename": "FKGLancher_ScreenShot/" + FKGLancher.screenShot.getFileName() + ".png"
-                });
-            }
-        )
-    }, 1000);
+    FKGLancher.other.getWindowState(function(window) {
+        setTimeout(function() {
+            chrome.tabs.captureVisibleTab(window.id, {
+                    "format": "png"
+                },
+                function(dataUrl) {
+                    chrome.downloads.download({
+                        "url": dataUrl,
+                        "filename": "FKGLancher_ScreenShot/" + FKGLancher.screenShot.getFileName() + ".png"
+                    });
+                }
+            );
+        }, 1000);
+    });
 }
 
 FKGLancher.screenShot.getFileName = function() {

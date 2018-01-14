@@ -1,23 +1,13 @@
-FKGLancher.other.showNotification = function(title, message) {
-    chrome.notifications.create({
-        "type": "basic",
-        "iconUrl": chrome.runtime.getManifest().browser_action.default_icon,
-        "title": title,
-        "message": message
-    });
-}
-
 FKGLancher.other.openGameWindow = function() {
     if (FKGLancher.window) {
-        chrome.windows.update(FKGLancher.window.id, {
-            "focused": true
+        FKGLancher.other.getWindowState(function(window) {
+            chrome.windows.update(window.id, {
+                "focused": true
+            });
         });
         return;
     }
 
-    chrome.browserAction.setPopup({
-        "popup": "popup.html"
-    });
     chrome.windows.create({
             "url": FKGLancher.gameUrl,
             "focused": true,
@@ -28,8 +18,7 @@ FKGLancher.other.openGameWindow = function() {
             "height": FKGLancher.gameSize.height
         },
         function(newWindow) {
-            FKGLancher.window = newWindow;
-            localStorage.setItem(FKGLancher.windowKey, JSON.stringify(newWindow));
+            FKGLancher.setWindow(newWindow);
 
             var width = FKGLancher.gameSize.width + (newWindow.width - newWindow.tabs[0].width);
             var height = FKGLancher.gameSize.height + (newWindow.height - newWindow.tabs[0].height);
@@ -40,4 +29,27 @@ FKGLancher.other.openGameWindow = function() {
             });
         }
     );
+}
+
+FKGLancher.other.showNotification = function(title, message) {
+    chrome.notifications.create({
+        "type": "basic",
+        "iconUrl": chrome.runtime.getManifest().browser_action.default_icon,
+        "title": title,
+        "message": message
+    });
+}
+
+FKGLancher.other.getWindowState = function(handler) {
+    if (!FKGLancher.window) return;
+    chrome.windows.get(FKGLancher.window.id, function(window) {
+        handler(window);
+    });
+}
+
+FKGLancher.other.getTabState = function(handler) {
+    if (!FKGLancher.window) return;
+    chrome.tabs.get(FKGLancher.window.tabs[0].id, function(tab) {
+        handler(tab);
+    });
 }

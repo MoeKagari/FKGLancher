@@ -29,10 +29,10 @@ document.getElementById("screenShot").onclick = function() {
     });
 };
 //静音
-document.getElementById("mute").onclick = function() {
+document.getElementById("sound_mute").onclick = function() {
     chrome.runtime.sendMessage({
         "name": "FKGLancher_Message",
-        "messageType": "mute"
+        "messageType": "sound_mute"
     });
 };
 

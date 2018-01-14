@@ -1,4 +1,5 @@
 var FKGLancher = {
+    //只能使用其中的 window的id 以及 tab的id
     "window": null,
     "windowKey": "WindowObj",
 
@@ -14,15 +15,41 @@ var FKGLancher = {
     "other": {}
 };
 
-FKGLancher.init = function() {
+FKGLancher.setWindow = function(window) {
+    FKGLancher.window = window;
+    if (window) {
+        localStorage.setItem(FKGLancher.windowKey, JSON.stringify(window));
+    } else {
+        localStorage.removeItem(FKGLancher.windowKey);
+    }
+    chrome.browserAction.setPopup({
+        "popup": (window ? "popup.html" : "")
+    });
+};
+
+//初始化
+(function() {
     //由于 "persistent": false
     //FKGLancher 并不是常驻于内存,有必要将 window localStorage
-    this.window = JSON.parse(localStorage.getItem(FKGLancher.windowKey));
+    console.log("init");
+    console.log(FKGLancher.window);
+    FKGLancher.setWindow(JSON.parse(localStorage.getItem(FKGLancher.windowKey)));
+    console.log("init over");
+    console.log(FKGLancher.window);
 
+    chrome.runtime.onInstalled.addListener(function() {
+        console.log("onInstalled");
+        console.log(FKGLancher.window);
+        localStorage.removeItem(FKGLancher.windowKey);
+    });
     chrome.browserAction.onClicked.addListener(function(tab) {
+        console.log("onClicked");
+        console.log(FKGLancher.window);
         FKGLancher.other.openGameWindow();
     });
     chrome.webNavigation.onDOMContentLoaded.addListener(function(details) {
+        console.log("onDOMContentLoaded");
+        console.log(FKGLancher.window);
         if (FKGLancher.window) {
             if (FKGLancher.window.tabs[0].id == details.tabId) {
                 chrome.tabs.executeScript(details.tabId, {
@@ -32,18 +59,18 @@ FKGLancher.init = function() {
         }
     });
     chrome.windows.onRemoved.addListener(function(windowId) {
+        console.log("onRemoved");
+        console.log(FKGLancher.window);
         if (FKGLancher.window) {
             if (FKGLancher.window.id == windowId) {
-                FKGLancher.window = null;
-                localStorage.removeItem(FKGLancher.windowKey);
-                chrome.browserAction.setPopup({
-                    "popup": ""
-                });
+                FKGLancher.setWindow(null);
             }
         }
     });
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        console.log("onMessage");
+        console.log(FKGLancher.window);
         if (request.name === "FKGLancher_Message") {
             switch (request.messageType) {
                 case "openGameWindow":
@@ -52,7 +79,7 @@ FKGLancher.init = function() {
                 case "screenShot":
                     FKGLancher.screenShot.take();
                     break;
-                case "mute":
+                case "sound_mute":
                     FKGLancher.sound.toggleSoundMute();
                     break;
 
@@ -72,9 +99,4 @@ FKGLancher.init = function() {
             }
         }
     });
-}
-
-FKGLancher.init();
-chrome.runtime.onInstalled.addListener(function() {
-    localStorage.removeItem(FKGLancher.windowKey);
-});
+})();
